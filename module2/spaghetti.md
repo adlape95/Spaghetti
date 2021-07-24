@@ -1,11 +1,18 @@
----
-title: "Spaghetti: In situ analysis of 16S rRNA nanopore sequencing data"
-author: "Adriel Latorre-Pérez"
-affiliation: "Darwin Bioprospecting Excellence"
-date: "November, 2020"
-version: "1.0"
-output: md_document
----
+<p align="center">
+  <img src="../misc/spaghetti-art.svg">
+</p>
+
+# Spaghetti: In situ analysis of 16S rRNA nanopore sequencing data
+
+This script was used for semi-automatically (metadata was created manually) analyze and visualize microbiome data during the Tabernas Desert expedition.
+
+Input: otu_table.csv, phyloseq_taxonomy.csv (output from module 1) and metadata (manually created).
+
+The inputs used in the original analysis are provided for reproducibility.
+
+*Note: some paramenters should be changed in order to adapt the code to any other experimental design*
+
+Load the required libraries:
 
 ```{r LibraryLoading, echo=FALSE, warning=FALSE, results=FALSE, message=FALSE}
 # Load the requiered packages
@@ -18,6 +25,8 @@ library(tidyr)
 library(dplyr)
 library("gridExtra")
 ```
+
+Load this function created by [vmkikk](https://rdrr.io/github/vmikk/metagMisc/src/R/phyloseq_to_df.R), which will be used below.
 
 ```{r phyloseqToDF, echo=FALSE, warning=FALSE, results=FALSE, message=FALSE}
 phyloseq_to_df <- function(physeq, addtax = T, addtot = F, addmaxrank = F, sorting = "abundance"){
@@ -107,8 +116,9 @@ phyloseq_to_df <- function(physeq, addtax = T, addtot = F, addmaxrank = F, sorti
 }
 ```
 
+Load and format the (pseudo)OTU table
+
 ```{r OTUtableLoading, echo=FALSE, warning=FALSE, results=FALSE}
-# Load and format the (pseudo)OTU table
 otufile = read.csv("./otu_table.csv", header = TRUE, sep=',')
 otus = otufile[,1]
 otufile = otufile[,2:length(colnames(otufile))]
@@ -116,9 +126,9 @@ rownames(otufile) = otus
 otu_matrix = as.matrix(otufile)
 ```
 
+Load the taxonomy table
 
 ```{r TaxTableLoading, echo=FALSE, warning=FALSE, results=FALSE}
-# Load the taxonomy table
 taxfile = read.csv("./phyloseq_taxonomy.csv", header = TRUE, sep=",")
 otus = taxfile[,1]
 taxfile = taxfile[,2:length(colnames(taxfile))]
@@ -126,8 +136,9 @@ rownames(taxfile) = otus
 tax_matrix = as.matrix(taxfile)
 ```
 
+Load the metadata
+
 ```{r MetadataLoading, echo=FALSE, warning=FALSE, results=FALSE}
-# Load the metadata
 mapfile = read.csv("./Metadata.csv", header = TRUE, sep=",")
 samples = mapfile[,1]
 mapfile$SampleName = samples
@@ -139,8 +150,9 @@ mapfile = mapfile[ord,]
 sampledata = sample_data(mapfile)
 ```
 
+Load everything into phyloseq
+
 ```{r PhyloseqObjectCreation, echo=FALSE, warning=FALSE, results=FALSE}
-# Load everything into phyloseq
 OTU = otu_table(otu_matrix, taxa_are_rows = TRUE)
 TAX = tax_table(tax_matrix)
 physeq = phyloseq(OTU, TAX, sampledata)
@@ -149,10 +161,6 @@ physeq = phyloseq(OTU, TAX, sampledata)
 # Library Size Summary
 
 Library size by sample:
-
-```{r SampleSums, echo=FALSE, warning=FALSE}
-sample_sums(physeq)
-```
 
 ```{r SampleSumsFigure, echo=FALSE, warning=FALSE}
 # The same but in a Figure
@@ -169,28 +177,19 @@ fig
 htmlwidgets::saveWidget(fig, "seqsPerSample.html")
 ```
 
-Summarized library size:
+<p align="center">
+  <img src="./Figures/seqsPerSample.png">
+</p>
 
-```{r SAmpleSumLibrary, echo=FALSE, warning=FALSE}
-summary(sample_sums(physeq))
-```
+*This figure would be interactive*
 
 -------------------------------------------------------------------------------------
 
-```{r SpeciesCollapse, echo=FALSE, warning=FALSE}
-# Collapse the phyloseq object to the species level
-# -------------------------------------------------
-# Explanaition: in this pipeline, 16S rRNA ONT sequences are directly mapped to a database.
-# Due to the intrinsic error of ONT sequences, there is no other "easy" and "fast" way to
-# set a 16S pipeline. The "problem" here is that reads that probably come from the same
-# original DNA sequence will have ~94% of error, so OTU clustering it's not possible without
-# transformations. This artificial discrepancies will cause that two reads coming from the
-# same DNA sample will hit two different OTUs in the database. These OTUs should be taxonomically
-# close (hopefully they are members of the same species). So, the solution is to collapse the
-# final assignments directly into species level. This would reduce the artificial heterogeneity and
-# we will be able to obtain more accurate rarefaction curves and diversity indexes.
-# -------------------------------------------------
+### Collapse the phyloseq object to the species level
 
+**Explanaition**: in this pipeline, 16S rRNA ONT sequences are directly mapped to a database. Due to the intrinsic error of ONT sequences, there is no other "easy" and "fast" way to set a 16S pipeline. The "problem" here is that reads that probably come from the same original DNA sequence will have ~94% of error, so OTU clustering it's not possible without transformations. This artificial discrepancies will cause that two reads coming from the same DNA sample will hit two different OTUs in the database. These OTUs should be taxonomically close (hopefully they are members of the same species). So, the solution is to collapse the final assignments directly into species level. This would reduce the artificial heterogeneity and we will be able to obtain more accurate rarefaction curves and diversity indexes.
+
+```{r SpeciesCollapse, echo=FALSE, warning=FALSE}
 # Collapse:
 physeq1 <- tax_glom(physeq, taxrank = rank_names(physeq)[7], NArm = FALSE)
 # Convert into relative
@@ -199,27 +198,9 @@ physeq1_rel  = transform_sample_counts(physeq1, function(x) x / sum(x)*100 )
 
 -------------------------------------------------------------------------------------
 
-# alpha-diversity
+# alpha diversity
 
-Species level (not normalized):
-
-```{r SpeciesAlpha, echo=FALSE, warning=FALSE, message=FALSE}
-p = plot_richness(physeq1, x="SampleName", color="SampleType", measures=c("Observed","Simpson", "Shannon"), nrow = 3, sortby = "Observed") + xlab("") + ylab("") + geom_point(alpha=0.7, size = 3) + theme_light() + theme(axis.text.x = element_text(angle = 35, hjust = 1))
-p
-
-ggsave(file = "./Figures/alfa-diversity-noNorm.svg", plot = p, device = "svg", scale = 1.5)
-```
-
-Species level (rarefied to the lower sample):
-
-```{r SpeciesAlphaRarefied, echo=FALSE, warning=FALSE, message=FALSE}
-p = plot_richness(rarefy_even_depth(physeq1, rngseed = 711), x="SampleName", color="SampleType", measures=c("Observed","Simpson", "Shannon"), nrow = 3, sortby = "Observed") + xlab("") + ylab("") + geom_point(alpha=0.7, size = 3) + theme_light() + theme(axis.text.x = element_text(angle = 35, hjust = 1))
-p
-
-ggsave(file = "./Figures/alfa-diversity-rarefied.svg", plot = p, device = "svg", scale = 1.5)
-```
-
-Genus level (not normalized):
+First collapse the table to genus level.
 
 ```{r GenusCollapse, echo=FALSE, warning=FALSE, message=FALSE}
 # Collapse to Genus level:
@@ -228,12 +209,18 @@ physeq_R6 <- tax_glom(physeq, taxrank = rank_names(physeq)[6], NArm = FALSE)
 physeq_R6_rel  = transform_sample_counts(physeq_R6, function(x) x / sum(x)*100 )
 ```
 
+Genus level alpha diversity (not normalized):
+
 ```{r GenusAlpha, echo=FALSE, warning=FALSE, message=FALSE}
 p = plot_richness(physeq_R6, x="SampleName", color="SampleType", measures=c("Observed","Simpson", "Shannon"), nrow = 3, sortby = "Observed") + xlab("") + ylab("") + geom_point(alpha=0.7, size = 3) + theme_light() + theme(axis.text.x = element_text(angle = 35, hjust = 1))
 p
 
 ggsave(file = "./Figures/GENUS-alfa-diversity-noNorm.svg", plot = p, device = "svg", scale = 1.5)
 ```
+
+<p align="center">
+  <img src="./Figures/GENUS-alfa-diversity-noNorm.svg">
+</p>
 
 Genus level (rarefied to the lower sample):
 
@@ -244,9 +231,13 @@ p
 ggsave(file = "./Figures/GENUS-alfa-diversity-rarefied.svg", plot = p, device = "svg", scale = 1.5)
 ```
 
+<p align="center">
+  <img src="./Figures/GENUS-alfa-diversity-rarefied.svg">
+</p>
+
 -------------------------------------------------------------------------------------
 
-# beta-diversity
+# beta diversity
 
 PCoA - Bray Curtis - Species level:
 
@@ -266,6 +257,10 @@ p
 ggsave(file = "./Figures/SPECIES-PCoA.svg", plot = p, device = "svg")
 ```
 
+<p align="center">
+  <img src="./Figures/SPECIES-PCoA.svg">
+</p>
+
 PCoA - Bray Curtis - Genus level:
 
 ```{r GenusPCoA, echo=FALSE, warning=FALSE, message=FALSE}
@@ -284,9 +279,15 @@ p
 ggsave(file = "./Figures/GENUS-PCoA.svg", plot = p, device = "svg")
 ```
 
+<p align="center">
+  <img src="./Figures/GENUS-PCoA.svg">
+</p>
+
 -------------------------------------------------------------------------------------
 
 # Top Phyla
+
+First collapse the table to phyum level.
 
 ```{r PhylumCollapse, echo=FALSE, warning=FALSE, message=FALSE}
 # Collapse to Genus level:
@@ -294,6 +295,8 @@ physeq_R2 <- tax_glom(physeq1, taxrank = rank_names(physeq1)[2], NArm = FALSE)
 # Convert into relative
 physeq_R2_rel  = transform_sample_counts(physeq_R2, function(x) x / sum(x)*100 )
 ```
+
+Create the heatmap (top 20 phyla) with [ampvis2](https://madsalbertsen.github.io/ampvis2/).
 
 ```{r ampvis2Loading, echo=FALSE, warning=FALSE, message=FALSE}
 # Load ampvis2 package and convert the phyloseq object into a ampvis2 object
@@ -334,7 +337,15 @@ p
 ggsave(file = "./Figures/topPhyla.svg", plot = p, device = "svg", scale = 2)
 ```
 
+<p align="center">
+  <img src="./Figures/topPhyla.svg">
+</p>
+
+*Labels were modified with inkscape*
+
 # Top Genera
+
+Create the heatmap (top 20 genera) with [ampvis2](https://madsalbertsen.github.io/ampvis2/).
 
 ```{r ampvis2Loading2, echo=FALSE, warning=FALSE, message=FALSE}
 # Load ampvis2 package and convert the phyloseq object into a ampvis2 object
@@ -376,53 +387,31 @@ p
 ggsave(file = "./Figures/topGenera.svg", plot = p, device = "svg", scale = 2)
 ```
 
+<p align="center">
+  <img src="./Figures/topGenera.svg">
+</p>
+
+*Labels were modified with inkscape*
 
 # UV-resistant bacteria:
 
-UV-resistant and/or pigment-producing bacteria have been extensively described in the literature. So, we can know beforehand which taxa to search in this dataset. As the resolution of ONT 16S rRNA sequencing do not reach the species level (even using the entire 16S), we will search at the genus and family level.
+Desicattion- and radiation-resistant and/or pigment-producing bacteria have been extensively described in the literature. So, we can know beforehand which taxa to search in this dataset. As the resolution of ONT 16S rRNA sequencing do not reach the species level (even using the entire 16S), we will search at the genus and family level.
 
 Taxa of interest:
 --
 
 - **Genus level**: 
-  - Tanner (2020): *Hymenobacter*, *Deinococcus*, *Arthrobacter*, *Alcaligenes*, *Sphingomonas*, *Curtobacterium*, *Microbacterium*, *Kineococcus*, *Methylobacterium*, *Rubrobacter*, *Modestobacter*, *Rubellimicrobium*, *Planomicrobium*, *Bacillus*, *Rhodobacter*, *Chryseobacterium*
-  - Deng *et al.* (2016): *Micrococcus*
-  - Paulino-Lima *et al.* (2016): *Kocuria*, *Pontibacter*, *Geodermatophilus*, *Cellulomonas*
-  - Yu *et al.* (2015): *Knoellia*, *Lysobacter*, *Nocardioides*, *Paracoccus*, *Pontibacter*, *Rufibacter* and *Microvirga*
-  - Etemadifar *et al.* (2015): *Exiguobacterium*
-  
-- **Family level** (taxonomy as in Silva 138)
-  - *Hymenobacteraceae*: *Hymenobacter*, *Pontibacter*, *Rufibacter*
-  - *Deinococcaceae*: *Deinococcus*
-  - *Micrococcaceae*: *Arthrobacter*, *Micrococcus*, *Kocuria*
-  - *Microbacteriaceae*: *Curtobacterium*, *Microbacterium*
-  - *Alcaligenaceae*: *Alcaligenes*
-  - *Sphingomonadaceae*: *Sphingomonas*
-  - *Kineosporiaceae*: *Kineococcus*
-  - *Beijerinckiaceae*: *Methylobacterium-Methylorubrum*, *Microvirga*
-  - *Rubrobacteraceae*: *Rubrobacter*
-  - *Geodermatophilaceae*: *Modestobacter*, *Geodermatophilus*
-  - *Rhodobacteraceae*: *Rubellimicrobium*, *Rhodobacter*, *Paracoccus*
-  - *Planococcaceae*: *Planomicrobium*
-  - *Bacillaceae*: *Bacillus*
-  - *Weeksellaceae*: *Chryseobacterium*
-  - *Cellulomonadaceae*: *Cellulomonas*
-  - *Intrasporangiaceae*: *Knoellia*
-  - *Xanthomonadaceae*: *Lysobacter*
-  - *Nocardioidaceae*: *Nocardioides*
-  - *Exiguobacteraceae*: *Exiguobacterium*
-  - *Trueperaceae*: *Truepera*
-  
-Note: *Rufibacter* and *Microvirga* are NOT in GreenGenes 13_8, but they are included in Silva 138.
-
-(We finally use Silva 138).
+  - [Tanner (2020)](https://roderic.uv.es/handle/10550/77738): *Hymenobacter*, *Deinococcus*, *Arthrobacter*, *Alcaligenes*, *Sphingomonas*, *Curtobacterium*, *Microbacterium*, *Kineococcus*, *Methylobacterium*, *Rubrobacter*, *Modestobacter*, *Rubellimicrobium*, *Planomicrobium*, *Bacillus*, *Rhodobacter*, *Chryseobacterium*
+  - [Deng *et al.* (2016)](https://link.springer.com/article/10.1007/s00284-016-1015-y): *Micrococcus*
+  - [Paulino-Lima *et al.* (2016)](https://www.sciencedirect.com/science/article/abs/pii/S1011134415302037?via%3Dihub): *Kocuria*, *Pontibacter*, *Geodermatophilus*, *Cellulomonas*
+  - [Yu *et al.* (2015)](https://onlinelibrary.wiley.com/doi/abs/10.1002/jobm.201300390): *Knoellia*, *Lysobacter*, *Nocardioides*, *Paracoccus*, *Pontibacter*, *Rufibacter* and *Microvirga*
+  - [Etemadifar *et al.* (2015)](https://www.tandfonline.com/doi/abs/10.1080/01490451.2015.1063025?journalCode=ugmb20): *Exiguobacterium*
 
 ------------------------------------------------
 
+Let's select only the desiccation- and radiation-resistant bacteria listed above. I'll use the genus object, with normalization (relative proportions), in order to maintain the original % of the UV-bacteria selected
+
 ```{r SelectionUVGenus, echo=FALSE, warning=FALSE, message=FALSE}
-# Let's select only the UV-resistant bacteria listed above
-# I'll use the genus object, with normalization (relative proportions),
-# in order to maintain the original % of the UV-bacteria selected
 UV_R6_physeq = subset_taxa(physeq_R6_rel, Genus=="g__Hymenobacter" | Genus == "g__Pontibacter" | 
                              Genus == "g__Rufibacter" | Genus == "g__Deinococcus" |
                              Genus == "g__Arthrobacter" | Genus == "g__Micrococcus" |
@@ -440,6 +429,8 @@ UV_R6_physeq = subset_taxa(physeq_R6_rel, Genus=="g__Hymenobacter" | Genus == "g
                              Genus == "g__Nocardioides" | Genus == "g__Exiguobacterium" |
                              Genus == "g__Truepera")
 ```
+
+Convert the phyloseq object to an ampvis2 object
 
 ```{r ampvis2Loading3, echo=FALSE, warning=FALSE, message=FALSE}
 # Load ampvis2 package and convert the phyloseq object into a ampvis2 object
@@ -487,6 +478,10 @@ p
 ggsave(file = "./Figures/UVresistantGenera.svg", plot = p, device = "svg", scale = 2)
 ```
 
+<p align="center">
+  <img src="./Figures/UVresistantGenera.svg">
+</p>
+
 **Grouped:**
 
 ```{r GeneraBarplot, echo=FALSE, warning=FALSE, message=FALSE}
@@ -524,6 +519,12 @@ fig
 htmlwidgets::saveWidget(fig, "grouped-UVgenera.html")
 ```
 
+<p align="center">
+  <img src="./Figures/grouped-UVgenera.png">
+</p>
+
+*This figure would be interactive*
+
 **Richness of UV-bacteria (Presence/Absence):**
 
 ```{r GeneraUVPresenceAbsence, echo=FALSE, warning=FALSE, message=FALSE}
@@ -555,9 +556,13 @@ p1
 ggsave(file = "./Figures/UVresistantGenera_pres-abs.svg", plot = p1, device = "svg", scale = 1.5)
 ```
 
-*samples has been sorted by total richness (presence of UV-resisstant bacteria)*
+<p align="center">
+  <img src="./Figures/UVresistantGenera_pres-abs.svg">
+</p>
 
-**Abundance + richness of UV-bacteria (all together):**
+*Samples has been sorted by total richness (presence of resisstant bacteria)*
+
+### Abundance + richness of resistant bacteria + richness (all together):
 
 ```{r GeneraUVultimateFigure, echo=FALSE, warning=FALSE, message=FALSE}
 # Create the Uv-resistant bacteria abundance plot as above,
@@ -612,31 +617,12 @@ p3 = p3 + theme(legend.position = "none",
 grid.arrange(p, p2, p3, ncol = 3, nrow = 1, widths=c(3.5, .75, .75))
 ```
 
+<p align="center">
+  <img src="./Figures/ultimate-resistant-bacteria.svg">
+</p> 
+
 *Note: Samples are sorted by the total number of UV-resistant bacteria found (UV Bacteria)*
 *Note 2: Rarefaction to the lower library size has been performed in order to calculate richness*
-
--------------------------------------------------------------------------
-
-**OTU-like tables have been written for Species, Genera & Phylum Level.**
-
-```{r SpeciesTable, echo=FALSE, warning=FALSE, message=FALSE}
-# Species Summary Table
-all = phyloseq_to_df(physeq1_rel, sorting = NULL)
-# Write the table
-write.table(all, row.names = FALSE, file = "./Tables/species_table.csv", quote = FALSE, sep = '\t', dec = '.')
-```
-
-```{r GenusTable, echo=FALSE, warning=FALSE, message=FALSE}
-# Genus Summary Table
-all = phyloseq_to_df(physeq_R6_rel, sorting = NULL)
-# Write the table
-write.table(all, row.names = FALSE, file = "./Tables/genus_table.csv", quote = FALSE, sep = '\t', dec = '.')
-```
-
-```{r PhylumTable, echo=FALSE, warning=FALSE, message=FALSE}
-# Phylum Summary Table
-all = phyloseq_to_df(physeq_R2_rel, sorting = NULL)
-# Write the table
-write.table(all, row.names = FALSE, file = "./Tables/phylum_table.csv", quote = FALSE, sep = '\t', dec = '.')
+*Note 3: This figure was manually modified before its inclusion in the paper (Figure 3B)*
 ```
 
