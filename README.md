@@ -19,7 +19,7 @@ It has to be noted that **Spaghetti is not intended to be a bioinformatic tool, 
   * [Automatic execution](#automatic-execution)
   * [References](#references)
 - [Module 2: Exploratory analysis and data visualization module](#module-2--exploratory-analysis-and-data-visualization-module)
-- [Why 'Spaghetti'?](#why--spaghetti--)
+- [Why 'Spaghetti'?](#module-2--exploratory-analysis-and-data-visualization-module)
 - [Acknowledgements](#acknowledgements)
 - [License](#license)
 - [Citation](#citation)
