@@ -133,8 +133,6 @@ This module is based on the following previous works:
   - [Cuscó, A., Catozzi, C., Viñes, J., Sanchez, A., & Francino, O. (2019). Microbiota profiling with long amplicons using Nanopore sequencing: full-length 16S rRNA gene and the 16S-ITS-23S of the rrn operon. F1000research, 7, 1755. doi: 10.12688/f1000research.16817.2](https://f1000research.com/articles/7-1755)
   - [Urban, L., Holzer, A., Baronas, J., Hall, M., Braeuninger-Weimer, P., & Scherm, M. et al. (2021). Freshwater monitoring by nanopore sequencing. Elife, 10. doi: 10.7554/elife.61504](https://elifesciences.org/articles/61504)
   - [Santos, A., van Aerle, R., Barrientos, L., & Martinez-Urtaza, J. (2020). Computational methods for 16S metabarcoding studies using Nanopore sequencing data. Computational And Structural Biotechnology Journal, 18, 296-305. doi: 10.1016/j.csbj.2020.01.005](https://www.sciencedirect.com/science/article/pii/S2001037019303745)
-  
-Please, give appropriate credit to these works.
 
 # Module 2: Exploratory analysis and data visualization module
 
