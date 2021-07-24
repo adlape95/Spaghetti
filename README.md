@@ -136,7 +136,7 @@ This module is based on the following previous works:
 
 # Module 2: Exploratory analysis and data visualization module
 
-Spaghetti was specifically designed for Latorre-Pérez *et al* (yet to be published). This work was a proof of concept for the use of in situ nanopore sequence to characterize samples during a bioprospecting expedition. The main idea is that different sample types and/or locations can be analyzed through the journey, thus identifying which samples are more interesting depending on the objective of the bioprospecting activities. In our case, the goal was to detect those samples that showed a higher prevalence and abundance of genera that were previously described to be desiccation- and radiation-resistant. So, the data analysis was mainly -but not solely- focused on these taxa.
+Spaghetti was specifically designed for Latorre-Pérez *et al* (yet to be published). This work was a proof of concept for the use of in situ nanopore sequencing to characterize samples during a bioprospecting expedition. The rationale is that different sample types and/or locations can be analyzed through the journey, thus identifying which samples are more interesting depending on the objective of the bioprospecting activities. In our case, the goal was to detect those samples that showed a higher prevalence and abundance of genera that were previously described to be desiccation- and radiation-resistant. So, the data analysis was mainly -but not solely- focused on these taxa.
   
 The R code for this module is provided in [spaghetti.md](./module2/spaghetti.md).
   
