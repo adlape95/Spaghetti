@@ -152,7 +152,7 @@ Spaghetti is a pipeline that was designed ad hoc for being used during an expedi
 
 # Acknowledgements
   
-I would like to thank every developer that took part in creating the tools used in the Spaghetti. I'd also like to thanks the authors of the studies that inspired this pipeline ([see above](https://github.com/adlape95/Spaghetti#references)).
+I would like to thank every developer that took part in creating the tools used in the Spaghetti pipeline. I'd also like to thank the authors of the studies that inspired this pipeline ([see above](https://github.com/adlape95/Spaghetti#references)).
   
 # License
   
