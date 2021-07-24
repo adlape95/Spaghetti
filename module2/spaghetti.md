@@ -1,8 +1,8 @@
 <p align="center">
-  <img src="../misc/spaghetti-art.svg">
+  <img src="../misc/spaghetti-art-R.svg">
 </p>
 
-# Spaghetti: In situ analysis of 16S rRNA nanopore sequencing data
+# Spaghetti: Exploratory analysis and data visualization module
 
 This script was used for semi-automatically (metadata was created manually) analyze and visualize microbiome data during the Tabernas Desert expedition.
 
@@ -187,7 +187,7 @@ htmlwidgets::saveWidget(fig, "seqsPerSample.html")
 
 ### Collapse the phyloseq object to the species level
 
-**Explanaition**: in this pipeline, 16S rRNA ONT sequences are directly mapped to a database. Due to the intrinsic error of ONT sequences, there is no other "easy" and "fast" way to set a 16S pipeline. The "problem" here is that reads that probably come from the same original DNA sequence will have ~94% of error, so OTU clustering it's not possible without transformations. This artificial discrepancies will cause that two reads coming from the same DNA sample will hit two different OTUs in the database. These OTUs should be taxonomically close (hopefully they are members of the same species). So, the solution is to collapse the final assignments directly into species level. This would reduce the artificial heterogeneity and we will be able to obtain more accurate rarefaction curves and diversity indexes.
+**Rationale**: in this pipeline, 16S rRNA ONT sequences are directly mapped to a database. Due to the intrinsic error of ONT sequences, there is no other "easy" and "fast" way to set a 16S pipeline. The "problem" here is that reads that probably come from the same original DNA sequence will have ~94% of error, so OTU clustering it's not possible without transformations. This artificial discrepancies will cause that two reads coming from the same DNA sample will hit two different OTUs in the database. These OTUs should be taxonomically close (hopefully they are members of the same species). So, the solution is to collapse the final assignments directly into species level. This would reduce the artificial heterogeneity and we will be able to obtain more accurate rarefaction curves and diversity indexes.
 
 ```{r SpeciesCollapse, echo=FALSE, warning=FALSE}
 # Collapse:
@@ -622,7 +622,9 @@ grid.arrange(p, p2, p3, ncol = 3, nrow = 1, widths=c(3.5, .75, .75))
 </p> 
 
 *Note: Samples are sorted by the total number of UV-resistant bacteria found (UV Bacteria)*
+
 *Note 2: Rarefaction to the lower library size has been performed in order to calculate richness*
+
 *Note 3: This figure was manually modified before its inclusion in the paper (Figure 3B)*
 ```
 
