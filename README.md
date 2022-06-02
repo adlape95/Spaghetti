@@ -158,6 +158,6 @@ Spaghetti is based on many open-source tools. Please check the specific licenses
   
 # Citation
   
-- Latorre-Pérez A, Gimeno-Valero H, Tanner K, Pascual J, Vilanova C and Porcar M. A round trip to the desert: in situ Nanopore sequencing informs targeted bioprospecting. *Yet to be published.*
+- Latorre-Pérez, A., Gimeno-Valero, H., Tanner, K., Pascual, J., Vilanova, C., & Porcar, M. (2021). A Round Trip to the Desert: In situ Nanopore Sequencing Informs Targeted Bioprospecting. Frontiers In Microbiology, 12. doi: 10.3389/fmicb.2021.768240
   
 You should also cite all the tools included in the Spaghetti pipeline. Links to their GitHub pages have been included in this document. You could also find the papers cited in the "Experimental Procedures" section of our manuscript.
