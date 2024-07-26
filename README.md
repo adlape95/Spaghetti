@@ -62,7 +62,7 @@ rm *.paf
 -----------------------
 5. Filtered reads are mapped against the SILVA database (v. 138) ([Quast et al., 2013](https://academic.oup.com/nar/article/41/D1/D590/1069277))⁠, as formatted and provided by [Qiime2](https://docs.qiime2.org/2020.8/data-resources/), by using [minimap2](https://github.com/lh3/minimap2)⁠. In order to reduce minimap2’s memory usage, -K option was set to 10M, as previously suggested ([Gamaarachchi et al., 2019](https://www.nature.com/articles/s41598-019-40739-8))⁠.
 
-The database that was used in the study can be downloaded [using this link](https://data.qiime2.org/2020.8/common/silva-138-99-seqs.qza). The path for the fasta file is: ./silva-138-99-seqs/f12818e4-5681-434e-9af7-42b505a701d9/data/dna-sequences.fasta *
+The database that was used in the study can be downloaded [using this link](https://data.qiime2.org/2020.8/common/silva-138-99-seqs.qza). The path for the fasta file is: ./silva-138-99-seqs/a7432d0f-b5f7-409f-9daf-cd33db5de53f/data/dna-sequences.fasta *
 
 *Note that the exact path may vary depending on the version of Silva you have downloaded.
 
